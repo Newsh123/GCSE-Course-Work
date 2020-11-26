@@ -2,10 +2,10 @@ import csv
 import math
 from easygui import *
 
-coins = ('1p', '2p', '5p', '10p', '20p', '50p', '£1', '£2')
-coinWeight = (356, 356, 325, 325, 250, 160, 175, 120)
-coinAmount = (100, 50, 100, 50, 50, 20, 20, 10)
-values = {'1p': 0.01, '2p': 0.02, '5p': 0.05, '10p': 0.1, '20p': 0.2, '50p': 0.5, '£1': 1, '£2': 2}
+COINS = ('1p', '2p', '5p', '10p', '20p', '50p', '£1', '£2')
+COIN_WEIGHTS = (356, 356, 325, 325, 250, 160, 175, 120)
+COIN_AMOUNTS = (100, 50, 100, 50, 50, 20, 20, 10)
+VALUES = {'1p': 0.01, '2p': 0.02, '5p': 0.05, '10p': 0.1, '20p': 0.2, '50p': 0.5, '£1': 1, '£2': 2}
 
 
 def read():
@@ -60,7 +60,7 @@ def add():
     if array is None:
         return None
     volunteer = array[0]
-    coinType = array[1]
+    coin_type = array[1]
     weight = int(array[2])
     total, volunteers, attempts, percents = read()
     if volunteer in volunteers:
@@ -68,16 +68,16 @@ def add():
     else:
         msgbox('That is not a registered user', 'invalid')
         return None
-    ind = int(coins.index(coinType))
+    ind = int(COINS.index(coin_type))
     vol = int(volunteers.index(volunteer))
     percent = float(percents[vol])
-    cWeight = float(coinWeight[ind])
+    cWeight = float(COIN_WEIGHTS[ind])
     attempt = attempts[vol]
     if weight == cWeight:
         msgbox('No correcting is needed', 'correct')
         percents[vol] = ((((percent / 100) * attempt) + 1) / (attempt + 1)) * 100
         attempts[vol] = attempt + 1
-        total += values[coinType] * coinAmount[ind]
+        total += VALUES[coin_type] * COIN_AMOUNTS[ind]
         write(volunteers, attempts, percents, total)
     else:
         msgbox('The bag is incorrect', 'incorrect')
@@ -85,12 +85,12 @@ def add():
             percents[vol] = (((percent / 100) * attempt) / attempt + 1) * 100
         except ZeroDivisionError:
             percents[vol] = 0
-        fix(ind, vol, coinType, volunteers, attempts, percents, attempt, weight, total)
+        fix(ind, vol, coin_type, volunteers, attempts, percents, attempt, weight, total)
 
 
 def fix(ind, vol, coinType, volunteers, attempts, percents, attempt, weight, total):
-    cWeight = float(coinWeight[ind] / coinAmount[ind])
-    if weight // coinWeight[ind] != 0:
+    coin_weight = float(COIN_WEIGHTS[ind] / COIN_AMOUNTS[ind])
+    if weight // COIN_WEIGHTS[ind] != 0:
         msgbox(
             'That weight doesn\'t seem to be right for that coin. It is likely that some other coins have been jumbled '
             'up in there so will need recounting. After it has been recounted please could you re-enter it as the only '
@@ -100,21 +100,21 @@ def fix(ind, vol, coinType, volunteers, attempts, percents, attempt, weight, tot
         return None
     else:
         pass
-    if weight < coinWeight[ind]:
+    if weight < COIN_WEIGHTS[ind]:
         i = 0
-        while weight < coinWeight[ind]:
-            weight = float(weight + cWeight)
+        while weight < COIN_WEIGHTS[ind]:
+            weight = float(weight + coin_weight)
             i = i + 1
         i = '+' + str(i)
-    elif weight > coinWeight[ind]:
+    elif weight > COIN_WEIGHTS[ind]:
         i = 0
-        while weight > coinWeight[ind]:
-            weight = float(weight - cWeight)
+        while weight > COIN_WEIGHTS[ind]:
+            weight = float(weight - coin_weight)
             i = i + 1
-        i = '+' + str(i)
+        i = '-' + str(i)
     msgbox(f'you need to {i} coins', 'change')
     attempts[vol] = attempt + 1
-    total += values[coinType] * coinAmount[ind]
+    total += VALUES[coinType] * COIN_AMOUNTS[ind]
     write(volunteers, attempts, percents, total)
 
 
@@ -182,4 +182,4 @@ while True:
     elif option == 'add a volunteer':
         newUser()
     elif option == 'stop':
-        exit()
+        break
