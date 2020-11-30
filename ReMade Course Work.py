@@ -38,8 +38,8 @@ def read():
 # write command for general use throughout the program to write into the csv file
 def write(file):
     col1 = file[0]
-    col2 = str(file[1])
-    col3 = str(file[2])
+    col2 = file[1]
+    col3 = file[2]
     end = str(file[3])
     text = ''
     for i in range(0, len(col1)):
@@ -153,7 +153,7 @@ def view():
         except KeyError:
             base[percents[i]] = [[volunteers[i], attempts[i]]]
     sort(percents)
-    btw = buttonbox('How would you like to sort it?', 'sort', ['worst to best', 'best to worst'])
+    btw = buttonbox('How would you like to sort it?', 'sort', ['best to worst', 'worst to best'])
     rank = ''
     if btw == 'best to worst':
         for i in range(0, len(percents)):
@@ -165,7 +165,7 @@ def view():
             rank = rank + f'{str(i + 1)}. {base[percents[i]][0][0]} has had a  {str(percents[i])}% success rate with ' \
                           f'{base[percents[i]][0][1]} attempts\n'
             del base[percents[i]][0]
-    textbox('Here\'s the ranking:', 'ranking', rank)
+    textbox("Here's the ranking:", 'ranking', rank)
 
 
 '--------------------------------------------- Adding a Volunteer Commands --------------------------------------------'
