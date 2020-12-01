@@ -1,5 +1,6 @@
-Abena,0,0.0
-Malcolm,0,0.0
-Jane,0,0.0
-Henry,0,0.0
-0.0
+Abena, 1, 100.0
+Malcolm, 0, 0.0
+Jane, 0, 0.0
+Henry, 0, 0.0
+Lee, 0, 0.0
+5.0
