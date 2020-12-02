@@ -1,5 +1,6 @@
 """This program was made for fun to remake my original coin count program with new techniques that I have learn since.
-Some new features that I will be including are things like classes to improve the efficiency of the program.
+Some new features that I will be including are things like classes and decorators to improve the efficiency of the
+program.
 """
 
 # importing the libraries
@@ -16,37 +17,38 @@ VALUES = {'1p': 0.01, '2p': 0.02, '5p': 0.05, '10p': 0.1, '20p': 0.2, '50p': 0.5
 '------------------------------- Setting the Read and Write Commands for General Purpose ------------------------------'
 
 
-# read command for general use throughout the program to read in the csv file
-def read():
-    col1 = []
-    col2 = []
-    col3 = []
-    with open('CoinCount.txt', 'r') as file:
-        csv_file = csv.reader(file, delimiter=',')
-        for row in csv_file:
-            try:
-                end = float(row[0])
-                break
-            except ValueError:
-                pass
-            col1.append(row[0])
-            col2.append(int(row[1]))
-            col3.append(float(row[2]))
-    return col1, col2, col3, end
+# function that contains the read and write commands for the program
+def file_management(func):
+    def read():
+        col1 = []
+        col2 = []
+        col3 = []
+        with open('CoinCount.txt', 'r') as file:
+            csv_file = csv.reader(file, delimiter=',')
+            for row in csv_file:
+                try:
+                    end = float(row[0])
+                    break
+                except ValueError:
+                    pass
+                col1.append(row[0])
+                col2.append(int(row[1]))
+                col3.append(float(row[2]))
+        return col1, col2, col3, end
 
+    def write(*args):
+        col1, col2, col3, end = func(*args)
+        text = ''
+        for i in range(0, len(col1)):
+            text = f'{text}{col1[i]}, {col2[i]}, {col3[i]}\n'
+        text = text + str(end)
+        with open('CoinCount.txt', 'w') as doc:
+            doc.write(text)
 
-# write command for general use throughout the program to write into the csv file
-def write(file):
-    col1 = file[0]
-    col2 = file[1]
-    col3 = file[2]
-    end = str(file[3])
-    text = ''
-    for i in range(0, len(col1)):
-        text = f'{text}{col1[i]}, {col2[i]}, {col3[i]}\n'
-    text = text + end
-    with open('CoinCount.txt', 'w') as doc:
-        doc.write(text)
+    if func == 'read':
+        return read()
+    else:
+        return write
 
 
 '------------------------------------------------- Add a bag commands -------------------------------------------------'
@@ -60,8 +62,9 @@ class Bag:
         self.weight = int(inputs[2])
         self.file = []
 
+    @file_management
     def check(self):
-        global volunteers, attempts, percents, total
+        global total
         if self.name not in volunteers:
             msgbox('That is not a registered user', 'invalid')
             return None
@@ -76,6 +79,7 @@ class Bag:
             attempts[vol] = attempt + 1
             total += VALUES[self.coin] * COIN_AMOUNTS[ind]
             self.file = [volunteers, attempts, percents, total]
+            return self.file
         else:
             msgbox('The bag is incorrect', 'incorrect')
             try:
@@ -91,6 +95,7 @@ class Bag:
                 )
                 attempts[vol] = attempt + 1
                 self.file = [volunteers, attempts, percents, total]
+                return self.file
             else:
                 single_coin = float(COIN_WEIGHTS[ind] / COIN_AMOUNTS[ind])
                 i = 0
@@ -108,85 +113,79 @@ class Bag:
                 attempts[vol] = attempt + 1
                 total += VALUES[self.coin] * COIN_AMOUNTS[ind]
                 self.file = [volunteers, attempts, percents, total]
+                return self.file
 
 
 '-------------------------------------------- View the Volunteers Commands --------------------------------------------'
 
 
-# command to sort the volunteers
-def sort(arr):
-    if len(arr) == 1:
-        return arr
-    else:
-        mid = math.ceil(len(arr) / 2)
-        l = arr[:mid]
-        r = arr[mid:]
-        l = sort(l)
-        r = sort(r)
-        i = j = k = 0
-        while i != len(l) and j != len(r):
-            if l[i] > r[j]:
+# class to view volunteers and sort them
+class Viewer:
+    def __init__(self, key):
+        self.base = {}
+        self.percents = key
+
+    def sort(self, arr):
+        if len(arr) == 1:
+            return arr
+        else:
+            mid = math.ceil(len(arr) / 2)
+            l = arr[:mid]
+            r = arr[mid:]
+            l = self.sort(l)
+            r = self.sort(r)
+            i = j = k = 0
+            while i != len(l) and j != len(r):
+                if l[i] > r[j]:
+                    arr[k] = l[i]
+                    i += 1
+                else:
+                    arr[k] = r[j]
+                    j += 1
+                k += 1
+            while i != len(l):
                 arr[k] = l[i]
                 i += 1
-            else:
+                k += 1
+            while j != len(r):
                 arr[k] = r[j]
                 j += 1
-            k += 1
-        while i != len(l):
-            arr[k] = l[i]
-            i += 1
-            k += 1
-        while j != len(r):
-            arr[k] = r[j]
-            j += 1
-            k += 1
-        return arr
+                k += 1
+            return arr
 
-
-# command to view the volunteers
-def view():
-    global volunteers, attempts, percents, total
-    base = {}
-    for i in range(0, len(percents)):
-        try:
-            base[percents[i]].append([volunteers[i], attempts[i]])
-        except KeyError:
-            base[percents[i]] = [[volunteers[i], attempts[i]]]
-    sort(percents)
-    btw = buttonbox('How would you like to sort it?', 'sort', ['best to worst', 'worst to best'])
-    rank = ''
-    if btw == 'best to worst':
-        for i in range(0, len(percents)):
-            rank = rank + f'{str(i + 1)}. {base[percents[i]][0][0]} has had a  {str(percents[i])}% success rate with ' \
-                          f'{base[percents[i]][0][1]} attempts\n'
-            del base[percents[i]][0]
-    elif btw == 'worst to best':
-        for i in range(len(percents) - 1, -1, -1):
-            rank = rank + f'{str(i + 1)}. {base[percents[i]][0][0]} has had a  {str(percents[i])}% success rate with ' \
-                          f'{base[percents[i]][0][1]} attempts\n'
-            del base[percents[i]][0]
-    textbox("Here's the ranking:", 'ranking', rank)
+    def view(self, sort):
+        rank = ''
+        if sort == 'best to worst':
+            for i in range(0, len(self.percents)):
+                rank = rank + f'{str(i + 1)}. {self.base[self.percents[i]][0][0]} has had a  {str(self.percents[i])}%' \
+                              f' success rate with {self.base[self.percents[i]][0][1]} attempts\n'
+                del self.base[self.percents[i]][0]
+        elif sort == 'worst to best':
+            for i in range(len(self.percents) - 1, -1, -1):
+                rank = rank + f'{str(i + 1)}. {self.base[self.percents[i]][0][0]} has had a  {str(self.percents[i])}%' \
+                              f' success rate with {self.base[self.percents[i]][0][1]} attempts\n'
+                del self.base[self.percents[i]][0]
+        textbox("Here's the ranking:", 'ranking', rank)
 
 
 '--------------------------------------------- Adding a Volunteer Commands --------------------------------------------'
 
 
 # command to add a volunteer to the csv file
-def new_user():
-    global volunteers, attempts, percents, total
-    user = enterbox('What is the name of the user you would like to add?', 'add')
-    volunteers.append(user)
+@file_management
+def new_user(volunt):
+    volunteers.append(volunt)
     attempts.append(0)
     percents.append(0.0)
     file = [volunteers, attempts, percents, total]
-    write(file)
+    return file
 
 
 '---------------------------------------------------- Main Program ----------------------------------------------------'
 
-
 while True:
-    volunteers, attempts, percents, total = read()
+    ctx = None
+    volunteers, attempts, percents, total = file_management('read')
     option = buttonbox(
         'What do you want to do?',
         'Options',
@@ -199,13 +198,20 @@ while True:
         else:
             continue
         bag.check()
-        if bag.file:
-            write(bag.file)
     elif option == 'view the total':
         msgbox(f'The total money collected is {str(total)}', 'total')
     elif option == 'view the volunteers':
-        view()
+        volunteer = Viewer(percents)
+        for each in range(0, len(percents)):
+            try:
+                volunteer.base[percents[each]].append([volunteers[each], attempts[each]])
+            except KeyError:
+                volunteer.base[percents[each]] = [[volunteers[each], attempts[each]]]
+        volunteer.percents = volunteer.sort(volunteer.percents)
+        btw = buttonbox('How would you like to sort it?', 'sort', ['best to worst', 'worst to best'])
+        volunteer.view(btw)
     elif option == 'add a volunteer':
-        new_user()
+        user = enterbox('What is the name of the user you would like to add?', 'add')
+        new_user(user)
     elif option == 'stop':
         break
