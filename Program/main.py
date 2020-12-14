@@ -52,6 +52,7 @@ def main():
                 except KeyError:
                     volunteer.base[percents[each]] = [[volunteers[each], attempts[each]]]
             volunteer.percents = volunteer.sort(volunteer.percents)
+            print(volunteer.base)
             for each in volunteer.base:
                 swaps = True
                 while swaps:

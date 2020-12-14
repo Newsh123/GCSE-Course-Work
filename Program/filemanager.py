@@ -31,7 +31,7 @@ def read():
             except ValueError:
                 pass
             col1.append(row[0])
-            col2.append(int(row[1]))
+            col2.append(float(row[1]))
             col3.append(float(row[2]))
     return col1, col2, col3, end
 

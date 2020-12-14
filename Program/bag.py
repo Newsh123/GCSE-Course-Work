@@ -16,7 +16,7 @@ class Bag:
     def __init__(self, inputs):
         self.name = inputs[0]
         self.coin = inputs[1]
-        self.weight = int(inputs[2])
+        self.weight = float(inputs[2])
         self.file = []
 
     @filemanager.writer
@@ -43,7 +43,8 @@ class Bag:
                 percents[vol] = (((percent / 100) * attempt) / attempt + 1) * 100
             except ZeroDivisionError:
                 percents[vol] = 0
-            if self.weight // COIN_WEIGHTS[ind] != 0:
+            msgbox(f'{self.weight // COIN_WEIGHTS[ind]}, {self.weight}, {COIN_WEIGHTS[ind]}', 'test')
+            if self.weight % COIN_WEIGHTS[ind] != 0:
                 msgbox(
                     "That weight doesn't seem to be right for that coin. It is likely that some other coins have "
                     "been jumbled up in there so will need recounting. After it has been recounted please could you "
