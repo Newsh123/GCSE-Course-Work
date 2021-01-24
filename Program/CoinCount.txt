@@ -1,6 +1,7 @@
-Henry, 1, 100.0
+Henry, 5, 60.0
 Abena, 3, 100.0
 Malcolm, 0, 0.0
 Jane, 0, 0.0
 Alex, 0, 0.0
-20.0
+Heather, 1, 0.0
+60.0
