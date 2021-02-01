@@ -72,11 +72,16 @@ class Bag:
     @writer
     def check(self):
         global volunteers, attempts, percents, total
-        if self.name not in volunteers:
+        try:
+            ind = int(COINS.index(self.coin))
+        except ValueError:
+            msgbox('That is not a coin that can be entered')
+            return None
+        try:
+            vol = int(volunteers.index(self.name))
+        except ValueError:
             msgbox('That is not a registered user', 'invalid')
             return None
-        ind = int(COINS.index(self.coin))
-        vol = int(volunteers.index(self.name))
         percent = float(percents[vol])
         coin_weight = float(COIN_WEIGHTS[ind])
         attempt = attempts[vol]
@@ -93,7 +98,8 @@ class Bag:
                 percents[vol] = (((percent / 100) * attempt) / (attempt + 1)) * 100
             except ZeroDivisionError:
                 percents[vol] = 0
-            if self.weight % COIN_WEIGHTS[ind] != 0:
+            single_coin = float(COIN_WEIGHTS[ind] / COIN_AMOUNTS[ind])
+            if self.weight % single_coin != 0:
                 msgbox(
                     "That weight doesn't seem to be right for that coin. It is likely that some other coins have "
                     "been jumbled up in there so will need recounting. After it has been recounted please could you "
@@ -104,18 +110,17 @@ class Bag:
                 self.file = [volunteers, attempts, percents, total]
                 return self.file
             else:
-                single_coin = float(COIN_WEIGHTS[ind] / COIN_AMOUNTS[ind])
                 i = 0
                 if self.weight < COIN_WEIGHTS[ind]:
                     while self.weight < COIN_WEIGHTS[ind]:
                         self.weight = float(self.weight + single_coin)
                         i += 1
-                    i = '+' + str(i)
+                    i = '-' + str(i)
                 else:
-                    while self.weight < COIN_WEIGHTS[ind]:
+                    while self.weight > COIN_WEIGHTS[ind]:
                         self.weight = float(self.weight - single_coin)
                         i -= 1
-                    i = '+' + str(i)
+                    i = '+' + str(i)[1:]
                 msgbox(f'You need to {i} coins', 'change')
                 attempts[vol] = attempt + 1
                 total += VALUES[self.coin] * COIN_AMOUNTS[ind]
@@ -216,7 +221,6 @@ def main():
                 except KeyError:
                     volunteer.base[percents[each]] = [[volunteers[each], attempts[each]]]
             volunteer.percents = volunteer.sort(volunteer.percents)
-            print(volunteer.base)
             for each in volunteer.base:
                 swaps = True
                 while swaps:
